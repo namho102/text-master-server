@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/namho102/text-master-server#readme",
   "dependencies": {
-    "hapi": "^16.5.2"
+    "hapi": "^16.5.2",
+    "mongodb": "^2.2.31",
+    "monk": "^6.0.3"
   }
 }

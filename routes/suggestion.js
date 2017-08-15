@@ -1,40 +1,56 @@
 'use strict';
 
 const Boom = require('boom');
-
+const MongoClient = require('mongodb').MongoClient;
+const url = 'mongodb://localhost:27017/mydb';
 
 exports.register = function(server, options, next) {
 
-  // const db = server.app.db;
+  // console.log(server.app.db)
+  const db = server.app.db;
 
-
+  // console.log(db)
 
   server.route({
     method: 'GET',
     path: '/suggestion/{prefix}',
     handler: function(request, reply) {
       // let regex = {$regex : ".*" + request.params.query + ".*", $options: 'i'}   
-      // db.products.find({
-      //   'name': regex
-      // }, (err, docs) => {
+      let regex = {
+          $regex: new RegExp("^" + request.params.prefix)
+        }
+        // console.log(regex);
 
-      //   if (err) {
-      //     return reply(Boom.wrap(err, 'Internal MongoDB error'));
-      //   }
+      // db.collection('things').find({}).then((docs) => {
 
-      //   reply(docs);
-      // });
-      reply(request.params.prefix)
+      //   reply(doc)
+      // })
+
+      MongoClient.connect(url, function(err, db) {
+        console.log("Connected correctly to database.");
+
+
+        var cursor = db.collection('things').find({
+          "Word": regex
+        }).sort({'Count': -1}).limit(10);
+        cursor.toArray(function(err, docs) {
+
+          reply(docs);
+          db.close();
+        });
+
+      });
+
+
+
     }
   });
 
-
-  
 
 
   return next();
 };
 
 exports.register.attributes = {
-  name: 'routes-products'
+  name: 'routes-suggestion'
 };
