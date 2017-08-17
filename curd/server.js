@@ -26,7 +26,7 @@ server.connection({
 
 // });
 //Connect to db
-server.app.db = require('monk')(url)
+// server.app.db = require('monk')(url)
 
 
 //Load plugins and start server
