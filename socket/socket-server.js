@@ -15,10 +15,10 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('suggestion', function(data) {
-		// console.log(data);
+		console.log(data);
 
 		var {topic, prefix} = data;
-
+		
 		// console.log(prefix); 
 		
 		let regex = {
