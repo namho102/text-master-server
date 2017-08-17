@@ -1,7 +1,7 @@
 const server = require('http').createServer();
 const io = require('socket.io')(server);
 const MongoClient = require('mongodb').MongoClient;
-const url = 'mongodb://localhost:27017/mydb';
+const url = 'mongodb://localhost:27017/vocabulary';
 
 
 server.listen(3000, () => {
@@ -14,8 +14,12 @@ io.on('connection', function(socket) {
 		console.log('user disconnected');
 	});
 
-	socket.on('suggestion', function(prefix) {
-		console.log(prefix);
+	socket.on('suggestion', function(data) {
+		// console.log(data);
+
+		var {topic, prefix} = data;
+
+		// console.log(prefix); 
 		
 		let regex = {
 			$regex: new RegExp("^" + prefix)
@@ -24,7 +28,7 @@ io.on('connection', function(socket) {
 		MongoClient.connect(url, function(err, db) {
 			// console.log("Connected correctly to database.");
 
-			var cursor = db.collection('things').find({
+			var cursor = db.collection(topic).find({
 				"Word": regex
 			}).sort({
 				'Count': -1
