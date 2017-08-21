@@ -43,4 +43,28 @@ io.on('connection', function(socket) {
 		});
 
 	});
+
+	socket.on('follower', function(data) {
+		console.log(data);
+		var {topic, preword} = data;
+
+		MongoClient.connect(url, function(err, db) {
+			// console.log("Connected correctly to database.");
+
+			var cursor = db.collection(topic).find({
+				"Word": preword
+			}).sort({
+				'Count': -1
+			}).limit(10);
+		
+			cursor.toArray(function(err, docs) {
+				socket.emit('follower', docs)
+
+				db.close();
+			});
+
+		});
+
+
+	});
 });
