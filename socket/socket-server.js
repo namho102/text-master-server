@@ -78,7 +78,8 @@ io.on('connection', function(socket) {
 	socket.on('summarize', function(html) {
 
 		var content = htmlToText.fromString(html);
-		console.log(content);
+		// console.log(content);
+		// console.log(JSON.stringify(content));
 
 		SummaryTool.summarize('', content, function(err, summary) {
 			if (err) console.log("Something went wrong man!");
