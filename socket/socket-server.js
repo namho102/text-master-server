@@ -2,7 +2,7 @@ const server = require('http').createServer();
 const io = require('socket.io')(server);
 const MongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017/vocabulary';
-const SummaryTool = require('node-summary');
+const SummaryTool = require('./summary');
 var htmlToText = require('html-to-text');
 
 
@@ -85,11 +85,14 @@ io.on('connection', function(socket) {
 			if (err) console.log("Something went wrong man!");
 
 			// console.log(summary);
+			var data = {
+				summary: summary,
+				contentLength: content.length,
+				summaryLength: summary.length,
+				summaryRatio: (100 - (100 * (summary.length / content.length)))
 
-			socket.emit('summarize', summary)
-				// console.log("Original Length " + (title.length + content.length));
-				// console.log("Summary Length " + summary.length);
-				// console.log("Summary Ratio: " + (100 - (100 * (summary.length / (title.length + content.length)))));
+			}
+			socket.emit('summarize', data)
 		});
 
 	});
