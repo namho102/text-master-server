@@ -1,10 +1,13 @@
 const server = require('http').createServer();
 const io = require('socket.io')(server);
+const SummaryTool = require('./summary');
+const htmlToText = require('html-to-text');
+const retext = require('retext');
+const keywords = require('retext-keywords');
+const nlcstToString = require('nlcst-to-string');
+
 const MongoClient = require('mongodb').MongoClient;
 const url = 'mongodb://localhost:27017/vocabulary';
-const SummaryTool = require('./summary');
-var htmlToText = require('html-to-text');
-
 
 server.listen(3000, () => {
 	console.log('listening on *:3000');
@@ -80,6 +83,22 @@ io.on('connection', function(socket) {
 		var content = htmlToText.fromString(html);
 		// console.log(content);
 		// console.log(JSON.stringify(content));
+		var keyWords;
+
+		retext()
+			.use(keywords)
+			.process(content, function(err, file) {
+				if (err) throw err;
+
+				keyWords = file.data.keyphrases.map(function(phrase) {
+					return phrase.matches[0].nodes.map(nlcstToString).join('');
+
+				});
+
+
+
+			});
+
 
 		SummaryTool.summarize('', content, function(err, summary) {
 			if (err) console.log("Something went wrong man!");
@@ -89,7 +108,8 @@ io.on('connection', function(socket) {
 				summary: summary,
 				contentLength: content.length,
 				summaryLength: summary.length,
-				summaryRatio: (100 - (100 * (summary.length / content.length)))
+				summaryRatio: (100 - (100 * (summary.length / content.length))),
+				keyWords: keyWords
 
 			}
 			socket.emit('summarize', data)
