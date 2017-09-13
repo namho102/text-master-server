@@ -80,8 +80,10 @@ io.on('connection', function(socket) {
 
 	socket.on('summarize', function(html) {
 
-		var content = htmlToText.fromString(html);
-		// console.log(content);
+		var content = htmlToText.fromString(html, {
+			ignoreHref: true
+		});
+		console.log(content);
 		// console.log(JSON.stringify(content));
 		var keyWords;
 
