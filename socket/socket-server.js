@@ -6,16 +6,27 @@ const retext = require('retext');
 const keywords = require('retext-keywords');
 const nlcstToString = require('nlcst-to-string');
 
-const MongoClient = require('mongodb').MongoClient;
-const url = 'mongodb://localhost:27017/vocabulary';
+const {	connect, connection } = require('./connection');
+
+
+const db = (async() => {
+	return await MongoClient.connect(url)
+})()
 
 server.listen(3000, () => {
 	console.log('listening on *:3000');
 });
 
-io.on('connection', function(socket) {
+
+io.on('connection', async function(socket) {
+	const db = await connect();
+
+	console.log('database connected');
 	console.log('a user connected');
+
+
 	socket.on('disconnect', function() {
+		db.close();
 		console.log('user disconnected');
 	});
 
@@ -33,21 +44,17 @@ io.on('connection', function(socket) {
 			$regex: new RegExp("^" + prefix)
 		}
 
-		MongoClient.connect(url, function(err, db) {
-			// console.log("Connected correctly to database.");
 
-			var cursor = db.collection(topic).find({
-				"Word": regex
-			}).sort({
-				'Count': -1
-			}).limit(10);
+		var cursor = db.collection(topic).find({
+			"Word": regex
+		}).sort({
+			'Count': -1
+		}).limit(10);
 
-			cursor.toArray(function(err, docs) {
-				socket.emit('suggestion', docs)
+		cursor.toArray(function(err, docs) {
+			socket.emit('suggestion', docs)
 
-				db.close();
-			});
-
+			// db.close();
 		});
 
 	});
@@ -59,20 +66,15 @@ io.on('connection', function(socket) {
 			preword
 		} = data;
 
-		MongoClient.connect(url, function(err, db) {
-			// console.log("Connected correctly to database.");
-
-			var cursor = db.collection(topic).find({
-				"Word": preword
-			});
+		var cursor = db.collection(topic).find({
+			"Word": preword
+		});
 
 
-			cursor.toArray(function(err, docs) {
-				socket.emit('follower', docs)
+		cursor.toArray(function(err, docs) {
+			socket.emit('follower', docs)
 
-				db.close();
-			});
-
+			// db.close();
 		});
 
 
@@ -83,7 +85,7 @@ io.on('connection', function(socket) {
 		var content = htmlToText.fromString(html, {
 			ignoreHref: true
 		});
-		console.log(content);
+		// console.log(content);
 		// console.log(JSON.stringify(content));
 		var keyWords;
 
@@ -96,8 +98,6 @@ io.on('connection', function(socket) {
 					return phrase.matches[0].nodes.map(nlcstToString).join('');
 
 				});
-
-
 
 			});
 
