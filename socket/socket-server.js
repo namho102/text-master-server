@@ -1,87 +1,76 @@
-const server = require('http').createServer();
-const io = require('socket.io')(server);
-const SummaryTool = require('./summary');
-const htmlToText = require('html-to-text');
-const retext = require('retext');
-const keywords = require('retext-keywords');
-const nlcstToString = require('nlcst-to-string');
+const server = require("http").createServer();
+const io = require("socket.io")(server);
+const SummaryTool = require("./summary");
+const htmlToText = require("html-to-text");
+const retext = require("retext");
+const keywords = require("retext-keywords");
+const nlcstToString = require("nlcst-to-string");
 
-const {	connect, connection } = require('./connection');
+const { connect, connection } = require("./connection");
 
-
-const db = (async() => {
-	return await MongoClient.connect(url)
-})()
+const db = (async () => {
+	return await MongoClient.connect(url);
+})();
 
 server.listen(3000, () => {
-	console.log('listening on *:3000');
+	console.log("listening on *:3000");
 });
 
-
-io.on('connection', async function(socket) {
+io.on("connection", async function(socket) {
 	const db = await connect();
 
-	console.log('database connected');
-	console.log('a user connected');
+	console.log("database connected");
+	console.log("a user connected");
 
-
-	socket.on('disconnect', function() {
+	socket.on("disconnect", function() {
 		db.close();
-		console.log('user disconnected');
+		console.log("user disconnected");
 	});
 
-	socket.on('suggestion', function(data) {
+	socket.on("suggestion", function(data) {
 		console.log(data);
 
-		var {
-			topic,
-			prefix
-		} = data;
+		var { topic, prefix } = data;
 
-		// console.log(prefix); 
+		// console.log(prefix);
 
 		let regex = {
 			$regex: new RegExp("^" + prefix)
-		}
+		};
 
-
-		var cursor = db.collection(topic).find({
-			"Word": regex
-		}).sort({
-			'Count': -1
-		}).limit(10);
+		var cursor = db
+			.collection(topic)
+			.find({
+				Word: regex
+			})
+			.sort({
+				Count: -1
+			})
+			.limit(10);
 
 		cursor.toArray(function(err, docs) {
-			socket.emit('suggestion', docs)
+			socket.emit("suggestion", docs);
 
 			// db.close();
 		});
-
 	});
 
-	socket.on('follower', function(data) {
+	socket.on("follower", function(data) {
 		console.log(data);
-		var {
-			topic,
-			preword
-		} = data;
+		var { topic, preword } = data;
 
 		var cursor = db.collection(topic).find({
-			"Word": preword
+			Word: preword
 		});
 
-
 		cursor.toArray(function(err, docs) {
-			socket.emit('follower', docs)
+			socket.emit("follower", docs);
 
 			// db.close();
 		});
-
-
 	});
 
-	socket.on('summarize', function(html) {
-
+	socket.on("summarize", function(html) {
 		var content = htmlToText.fromString(html, {
 			ignoreHref: true
 		});
@@ -93,16 +82,12 @@ io.on('connection', async function(socket) {
 			.use(keywords)
 			.process(content, function(err, file) {
 				if (err) throw err;
-
 				keyWords = file.data.keyphrases.map(function(phrase) {
-					return phrase.matches[0].nodes.map(nlcstToString).join('');
-
+					return phrase.matches[0].nodes.map(nlcstToString).join("");
 				});
-
 			});
 
-
-		SummaryTool.summarize('', content, function(err, summary) {
+		SummaryTool.summarize("", content, function(err, summary) {
 			if (err) console.log("Something went wrong man!");
 
 			// console.log(summary);
@@ -110,12 +95,10 @@ io.on('connection', async function(socket) {
 				summary: summary,
 				contentLength: content.length,
 				summaryLength: summary.length,
-				summaryRatio: (100 - (100 * (summary.length / content.length))),
+				summaryRatio: 100 - 100 * (summary.length / content.length),
 				keyWords: keyWords
-
-			}
-			socket.emit('summarize', data)
+			};
+			socket.emit("summarize", data);
 		});
-
 	});
 });

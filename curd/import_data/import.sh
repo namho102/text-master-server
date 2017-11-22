@@ -1,1 +1,1 @@
- mongoimport -d vocabulary -c tech --type csv --file tech_.csv --headerline
+ mongoimport -d vocabulary -c entertainment --type csv --file entertainment_.csv --headerline
