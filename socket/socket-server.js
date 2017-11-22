@@ -1,16 +1,12 @@
-const server = require("http").createServer();
-const io = require("socket.io")(server);
-const SummaryTool = require("./summary");
-const htmlToText = require("html-to-text");
-const retext = require("retext");
-const keywords = require("retext-keywords");
-const nlcstToString = require("nlcst-to-string");
 
-const { connect, connection } = require("./connection");
-
-const db = (async () => {
-	return await MongoClient.connect(url);
-})();
+const server = require('http').createServer();
+const io = require('socket.io')(server);
+const SummaryTool = require('./summary');
+const htmlToText = require('html-to-text');
+const retext = require('retext');
+const keywords = require('retext-keywords');
+const nlcstToString = require('nlcst-to-string');
+const {	connect, connection } = require('./connection');
 
 server.listen(3000, () => {
 	console.log("listening on *:3000");
@@ -32,7 +28,6 @@ io.on("connection", async function(socket) {
 
 		var { topic, prefix } = data;
 
-		// console.log(prefix);
 
 		let regex = {
 			$regex: new RegExp("^" + prefix)
@@ -49,9 +44,8 @@ io.on("connection", async function(socket) {
 			.limit(10);
 
 		cursor.toArray(function(err, docs) {
-			socket.emit("suggestion", docs);
+			socket.emit('suggestion', docs)
 
-			// db.close();
 		});
 	});
 
@@ -64,9 +58,8 @@ io.on("connection", async function(socket) {
 		});
 
 		cursor.toArray(function(err, docs) {
-			socket.emit("follower", docs);
+			socket.emit('follower', docs)
 
-			// db.close();
 		});
 	});
 
