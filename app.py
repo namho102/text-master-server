@@ -1,4 +1,5 @@
-from bottle import  request, response
+import os
+from bottle import request, response
 import bottle
 from sklearn.externals import joblib
 
@@ -42,4 +43,7 @@ def index():
 
 
 app.install(EnableCors())
-app.run(host='localhost', port=8080)
+if os.environ.get('APP_LOCATION') == 'heroku':
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+else:
+    app.run(host='localhost', port=8080, debug=True)
