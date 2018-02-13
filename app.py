@@ -6,6 +6,7 @@ loaded_model = joblib.load('model/finalized_model.sav')
 vectorizer = joblib.load('model/vectorizer.pk')
 
 class EnableCors(object):
+
     name = 'enable_cors'
     api = 2
 
@@ -18,8 +19,7 @@ class EnableCors(object):
 
             if request.method != 'OPTIONS':
                 # actual request; reply with the actual response
-        		return fn(*args, **kwargs)
-                
+        	        return fn(*args, **kwargs)
 
         return _enable_cors
 
