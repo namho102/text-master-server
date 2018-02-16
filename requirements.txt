@@ -2,4 +2,3 @@ bottle
 sklearn
 numpy
 scipy
-gunicorn
